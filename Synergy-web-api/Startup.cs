@@ -18,7 +18,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Synergy.Domain.Constants;
+using Synergy.Domain.Implementation;
+using Synergy.Domain.Interfaces;
 using Synergy.Domain.ServiceModel;
+using Synergy.Repository.Database;
 
 namespace Synergy_web_api
 {
@@ -27,9 +30,11 @@ namespace Synergy_web_api
         private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRjEKOBL";
 
         private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
-        public Startup(IConfiguration configuration)
+        private readonly IHostEnvironment _env;
+        public Startup(IConfiguration configuration,IHostEnvironment evn)
         {
             Configuration = configuration;
+            _env = evn;
         }
 
         public IConfiguration Configuration { get; }
@@ -77,6 +82,7 @@ namespace Synergy_web_api
                 options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
             });
 
+           
 
             var tokenVaidationParameters = new TokenValidationParameters
             {
@@ -112,6 +118,7 @@ namespace Synergy_web_api
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
+          
         }
 
         private static void ConfigureSwagger(IServiceCollection services)

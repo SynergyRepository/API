@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Synergy.Repository\Synergy.Repository.csproj" />
     <ProjectReference Include="..\Synergy.Service\Synergy.Service.csproj" />
   </ItemGroup>
 

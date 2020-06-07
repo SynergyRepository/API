@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Synergy.Domain\Synergy.Domain.csproj" />
+    <ProjectReference Include="..\Synergy.Repository\Synergy.Repository.csproj" />
   </ItemGroup>
 
 </Project>

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -18,7 +19,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Synergy.Domain.Constants;
+using Synergy.Domain.Implementation;
+using Synergy.Domain.Interfaces;
 using Synergy.Domain.ServiceModel;
+using Synergy.Repository.Database;
+using Synergy.Repository.Interfaces;
 
 namespace Synergy_web_api
 {
@@ -27,9 +32,11 @@ namespace Synergy_web_api
         private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRjEKOBL";
 
         private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
-        public Startup(IConfiguration configuration)
+        private readonly IHostEnvironment _env;
+        public Startup(IConfiguration configuration,IHostEnvironment evn)
         {
             Configuration = configuration;
+            _env = evn;
         }
 
         public IConfiguration Configuration { get; }
@@ -38,6 +45,7 @@ namespace Synergy_web_api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            DatabaseContext(services);
 
             ApiBehaviour(services);
 
@@ -46,6 +54,8 @@ namespace Synergy_web_api
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddMemoryCache();
+            services.AddScoped<IDbContext, SynergyDbContext>();
+            services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             services.AddCors(options =>
             {
@@ -59,6 +69,16 @@ namespace Synergy_web_api
                                 .WithExposedHeaders("Authorization", "WWW-Authenticate", "X-Pagination");
                         });
             });
+        }
+
+        private void DatabaseContext(IServiceCollection services)
+        {
+            if (_env.IsDevelopment())
+                services.AddDbContext<SynergyDbContext>(options =>
+               options.UseSqlServer(Configuration.GetConnectionString("SynergyDbConnection")));
+            if (_env.IsProduction())
+                services.AddDbContext<SynergyDbContext>(options =>
+              options.UseSqlServer(Configuration.GetConnectionString("SynergyDbConnectionProduction")));
         }
 
         private void AuthorizationService(IServiceCollection services)
@@ -77,6 +97,7 @@ namespace Synergy_web_api
                 options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
             });
 
+           
 
             var tokenVaidationParameters = new TokenValidationParameters
             {
@@ -112,6 +133,7 @@ namespace Synergy_web_api
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
+          
         }
 
         private static void ConfigureSwagger(IServiceCollection services)

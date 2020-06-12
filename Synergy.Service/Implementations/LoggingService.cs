@@ -1,5 +1,6 @@
 ﻿using Synergy.Repository.Database;
 using Synergy.Repository.Interfaces;
+using Synergy.Repository.Models;
 using Synergy.Service.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -45,7 +46,7 @@ namespace Synergy.Service.Interfaces
                     Payload = response.Payload,
                     RequestUniqueRefernceId = response.RequestUniqueRefernceId,
                     HttpStatusCode = response.StatusCode,
-                    CadaWadaStatusCode = response.CadawadaStatusCode,
+                    SynergyStatusCode = response.CadawadaStatusCode,
                     DateLogged = DateTime.UtcNow
                 });
 

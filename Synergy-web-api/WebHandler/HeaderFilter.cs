@@ -21,7 +21,7 @@ public class HeaderFilter : IOperationFilter
                 In = ParameterLocation.Header,
                 Description = "Access Token",
                 Schema = new OpenApiSchema() { Type = "Bearer" },
-                Required = true,
+                Required = false,
             });
 
             //operation.Parameters.Add(new OpenApiParameter()

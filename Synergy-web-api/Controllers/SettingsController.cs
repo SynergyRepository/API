@@ -1,0 +1,75 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Synergy.Service.Enums;
+using Synergy.Service.Interfaces;
+using Synergy.Service.ViewModel;
+using Synergy_web_api.Base;
+using Synergy_web_api.Logging;
+using Synergy_web_api.WebHandler;
+
+namespace Synergy_web_api.Controllers
+{
+    [Route("api/settings")]
+    [ApiController]
+    [AllowAnonymous]
+    public class SettingsController : BaseController
+    {
+        private readonly ISynergySettings synergySettings;
+        public SettingsController(IWebHostEnvironment env, IHttpContextAccessor httpContext, IMemoryCache memoryCache, ISynergySettings synergy) : base(env, httpContext, memoryCache)
+        {
+            synergySettings = synergy;
+        }
+
+
+        [HttpPost("admin/country")]
+        [RequestLog("request")]
+        public async Task<IActionResult> AddCountry([FromBody] CountryViewModel request)
+        {
+
+            if (!ModelState.IsValid)
+                return BadRequest(RequestResponseFormatter.BadRequestResponse(ModelState, "BadGettingStartedRequest", "InvalidGettingStartedRequest", RootPath));
+            // return BadRequest();
+
+            var response = await synergySettings.AddCountry(request: request);
+
+            if (response.Status.Equals(ResponseStatus.BadRequest))
+                return BadRequest(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.Conflict))
+                return Conflict(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.ServerError))
+                return StatusCode(500, response.ErrorData);
+
+
+            return Ok(response.SuccessData);
+        }
+
+        [HttpGet("admin/country")]
+        [RequestLog("request")]
+        public async Task<IActionResult> GetCountry()
+        {
+
+            var response = await synergySettings.GetAllCountry();
+
+            if (response.Status.Equals(ResponseStatus.BadRequest))
+                return BadRequest(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.Conflict))
+                return Conflict(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.ServerError))
+                return StatusCode(500, response.ErrorData);
+
+
+            return Ok(response.SuccessData);
+        }
+    }
+}

@@ -94,10 +94,11 @@ namespace Synergy_web_api.Logging
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                throw;
+                log.Error(ex.Message, "RequestLogAttribute OnActionExecuting");
+
             }
 
             base.OnActionExecuted(context);

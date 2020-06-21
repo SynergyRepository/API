@@ -24,6 +24,8 @@ using Synergy.Domain.Interfaces;
 using Synergy.Domain.ServiceModel;
 using Synergy.Repository.Database;
 using Synergy.Repository.Interfaces;
+using Synergy.Service.Implementations;
+using Synergy.Service.Interfaces;
 
 namespace Synergy_web_api
 {
@@ -56,6 +58,11 @@ namespace Synergy_web_api
             services.AddMemoryCache();
             services.AddScoped<IDbContext, SynergyDbContext>();
             services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddTransient<IOnboardingService, OnboardingService>();
+            services.AddTransient<ISynergySettings, SynergySettings>();
+            services.AddTransient<ICryptographyService, CryptographyService>();
+            services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IHttpService, HttpService>();
 
             services.AddCors(options =>
             {
@@ -125,6 +132,8 @@ namespace Synergy_web_api
                 configureOptions.TokenValidationParameters = tokenVaidationParameters;
                 configureOptions.SaveToken = true;
             });
+
+
         }
 
         private static void ApiBehaviour(IServiceCollection services)

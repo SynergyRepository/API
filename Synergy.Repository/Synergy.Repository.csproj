@@ -11,6 +11,10 @@
     <Compile Remove="Migrations\20200608083548_client-requestlog-responselog.Designer.cs" />
     <Compile Remove="Migrations\20200608085509_client-requestlog-responselog.cs" />
     <Compile Remove="Migrations\20200608085509_client-requestlog-responselog.Designer.cs" />
+    <Compile Remove="Migrations\20200727094652_add-primaryKey.cs" />
+    <Compile Remove="Migrations\20200727094652_add-primaryKey.Designer.cs" />
+    <Compile Remove="Migrations\20200727100709_remove-country.cs" />
+    <Compile Remove="Migrations\20200727100709_remove-country.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

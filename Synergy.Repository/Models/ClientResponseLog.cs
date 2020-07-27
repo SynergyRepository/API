@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Synergy.Repository.Models
 {
-  public  class ClientResponseLog
+    public  class ClientResponseLog
     {
         public int ResponseId { get; set; }
         public string RequestUniqueRefernceId { get; set; }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,10 +18,10 @@ namespace Synergy_web_api.Controllers
     [AllowAnonymous]
     public class SettingsController : BaseController
     {
-        private readonly ISynergySettings synergySettings;
+        private readonly ISynergySettings _synergySettings;
         public SettingsController(IWebHostEnvironment env, IHttpContextAccessor httpContext, IMemoryCache memoryCache, ISynergySettings synergy) : base(env, httpContext, memoryCache)
         {
-            synergySettings = synergy;
+            _synergySettings = synergy;
         }
 
 
@@ -37,7 +34,7 @@ namespace Synergy_web_api.Controllers
                 return BadRequest(RequestResponseFormatter.BadRequestResponse(ModelState, "BadGettingStartedRequest", "InvalidGettingStartedRequest", RootPath));
             // return BadRequest();
 
-            var response = await synergySettings.AddCountry(request: request);
+            var response = await _synergySettings.AddCountry(request: request);
 
             if (response.Status.Equals(ResponseStatus.BadRequest))
                 return BadRequest(response.ErrorData);
@@ -57,7 +54,7 @@ namespace Synergy_web_api.Controllers
         public async Task<IActionResult> GetCountry()
         {
 
-            var response = await synergySettings.GetAllCountry();
+            var response = await _synergySettings.GetAllCountry();
 
             if (response.Status.Equals(ResponseStatus.BadRequest))
                 return BadRequest(response.ErrorData);

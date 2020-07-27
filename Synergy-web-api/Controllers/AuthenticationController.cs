@@ -1,39 +1,42 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Synergy.Service.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Synergy.Service.Enums;
-using Synergy.Service.Interfaces;
 using Synergy.Service.ViewModel;
 using Synergy_web_api.Base;
-using Synergy_web_api.Logging;
 using Synergy_web_api.WebHandler;
 
 namespace Synergy_web_api.Controllers
 {
     [AllowAnonymous]
-    [Route("api/registration")]
+    [Route("api/v1/authenticate")]
     [ApiController]
-    public class OnboardingController : BaseController
+    public class AuthenticationController : BaseController
     {
-        private readonly IOnboardingService _onboarding;
-        public OnboardingController(IWebHostEnvironment env, IHttpContextAccessor httpContext, IMemoryCache memoryCache, IOnboardingService onboardingService) : base(env, httpContext, memoryCache)
+        private readonly IAuthenticationService _authenticationService;
+        public AuthenticationController(IWebHostEnvironment env, IHttpContextAccessor httpContext, IMemoryCache memoryCache, IAuthenticationService authentication) : base(env, httpContext, memoryCache)
         {
-            _onboarding = onboardingService;
+            _authenticationService = authentication;
         }
 
-        
-        [HttpPost("user")]
-        [RequestLog("request")]
-        public async Task<IActionResult> UserSignOn([FromBody] RegisterUserViewmodel request)
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginViewModel login)
+
         {
             if (!ModelState.IsValid)
-                return BadRequest(RequestResponseFormatter.BadRequestResponse(ModelState, "BadGettingStartedRequest", "InvalidGettingStartedRequest", RootPath));
-            // return BadRequest();
+                return BadRequest(RequestResponseFormatter.BadRequestResponse(ModelState, "BadLoginRequest",
+                    "InvalidLoginRequest", RootPath));
 
-            var response = await _onboarding.UserSignOn(request: request);
+
+            var response = await _authenticationService.LoginUserAsyn(login);
+
+            if (response.Status == ResponseStatus.Unauthorized)
+                return Unauthorized(response.ErrorData);
 
             if (response.Status.Equals(ResponseStatus.BadRequest))
                 return BadRequest(response.ErrorData);
@@ -46,6 +49,8 @@ namespace Synergy_web_api.Controllers
 
 
             return Ok(response.SuccessData);
+
+           
         }
     }
 }

@@ -2,26 +2,23 @@
 using Newtonsoft.Json;
 using NLog;
 using Synergy.Service.ApiResponse;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 
 namespace Synergy_web_api.WebHandler
 {
     public class RequestResponseFormatter
     {
-        public static Logger log = LogManager.GetCurrentClassLogger();
+        public static Logger Log = LogManager.GetCurrentClassLogger();
 
         public static ErrorResponse<List<BadRequestErrorResponse>> BadRequestResponse(ModelStateDictionary modelState, string errorTitle, string errorMessageNode, string rootPath)
         {
             var error = new List<BadRequestErrorResponse>();
-            string key = "", message = "";
+            string message = "";
             foreach (var item in modelState)
             {
-                key = item.Key;
+                var key = item.Key;
                 foreach (var errors in item.Value.Errors)
                 {
                     message += $"{errors.ErrorMessage} ,";
@@ -39,7 +36,7 @@ namespace Synergy_web_api.WebHandler
                
 
             var serializedRequest = JsonConvert.SerializeObject(error);
-            log.Error($"{errorTitle}: {serializedRequest}");
+            Log.Error($"{errorTitle}: {serializedRequest}");
            
             return new ErrorResponse<List<BadRequestErrorResponse>>
             {

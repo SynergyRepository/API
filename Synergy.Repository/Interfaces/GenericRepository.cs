@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Synergy.Repository.Interfaces
@@ -52,27 +51,21 @@ namespace Synergy.Repository.Interfaces
             _context.Set<TEntity>().Remove(entity);
         }
 
-        public async Task DeleteAsync(TEntity entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
-
-            if (_context.Entry(entity).State.Equals(EntityState.Detached))
-                _context.Set<TEntity>().Attach(entity);
-
-            _context.Set<TEntity>().Remove(entity);
-        }
+       
 
         public void DeleteRange(IEnumerable<TEntity> entities)
         {
             if (entities == null)
                 throw new ArgumentNullException("entities");
 
+            IEnumerable<TEntity> enumerable = entities as TEntity[] ?? entities.ToArray();
             if (_context.Entry(entities).State.Equals(EntityState.Detached))
-                _context.Set<IEnumerable<TEntity>>().Attach(entities);
+                _context.Set<IEnumerable<TEntity>>().Attach(enumerable);
 
-            _context.Set<TEntity>().RemoveRange(entities);
+            _context.Set<TEntity>().RemoveRange(enumerable);
         }
+
+       
 
         public void Update(TEntity entity)
         {
@@ -82,13 +75,7 @@ namespace Synergy.Repository.Interfaces
             _context.SaveChanges();
         }
 
-        public async Task UpdateAsync(TEntity entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
-
-            _context.SaveChanges();
-        }
+       
 
         public void UpdateAll(TEntity entity)
         {
@@ -125,10 +112,7 @@ namespace Synergy.Repository.Interfaces
             return _context.SaveChanges();
         }
 
-        public async Task<int> SaveAsync()
-        {
-            return _context.SaveChanges();
-        }
+      
 
         public IEnumerable<TEntity> GetAll(Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null)
         {
@@ -158,7 +142,7 @@ namespace Synergy.Repository.Interfaces
                 {
                     DbEntities = _context.Set<TEntity>();
                 }
-                return DbEntities as DbSet<TEntity>;
+                return DbEntities;
             }
         }
         protected virtual IEnumerable<TEntity> GetQueryable(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null,
@@ -174,7 +158,7 @@ namespace Synergy.Repository.Interfaces
             }
 
             foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 query = query.Include(includeProperty);
             }
@@ -210,7 +194,7 @@ namespace Synergy.Repository.Interfaces
             }
 
             foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                (new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 query = query.Include(includeProperty);
             }

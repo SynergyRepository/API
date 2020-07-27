@@ -1,14 +1,13 @@
 ﻿using Synergy.Domain.Interfaces;
 using Synergy.Domain.ServiceModel;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Synergy.Domain.Implementation
 {
-   public class CryptographyService : ICryptographyService
+    public class CryptographyService : ICryptographyService
     {
         private readonly int _hashSize = 32;
         private readonly int _hashIterations = 128;
@@ -17,9 +16,9 @@ namespace Synergy.Domain.Implementation
         private byte[] CreateSalt()
         {
             byte[] salt;
-            using (RNGCryptoServiceProvider rNGCryptoServiceProvider = new RNGCryptoServiceProvider())
+            using (RNGCryptoServiceProvider rNgCryptoServiceProvider = new RNGCryptoServiceProvider())
             {
-                rNGCryptoServiceProvider.GetBytes(salt = new byte[_hashSize]);
+                rNgCryptoServiceProvider.GetBytes(salt = new byte[_hashSize]);
             }
             return salt;
         }
@@ -60,13 +59,13 @@ namespace Synergy.Domain.Implementation
 
         public string Base64Encode(string plainText)
         {
-            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            return System.Convert.ToBase64String(plainTextBytes);
+            var plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(plainTextBytes);
         }
         public string Base64Decode(string base64EncodedData)
         {
-            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+            return Encoding.UTF8.GetString(base64EncodedBytes);
         }
 
         #endregion
@@ -96,9 +95,9 @@ namespace Synergy.Domain.Implementation
             TripleDES des = new TripleDESCryptoServiceProvider();
             des.Mode = CipherMode.ECB;
             des.Padding = PaddingMode.PKCS7;
-            des.Key = ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+            des.Key = Encoding.UTF8.GetBytes(encryptionKey);
             ICryptoTransform cryptoTransform = des.CreateEncryptor();
-            byte[] dataBytes = ASCIIEncoding.UTF8.GetBytes(model);
+            byte[] dataBytes = Encoding.UTF8.GetBytes(model);
             byte[] encryptedDataBytes = cryptoTransform.TransformFinalBlock(dataBytes, 0, dataBytes.Length);
             des.Clear();
             return Convert.ToBase64String(encryptedDataBytes);
@@ -107,21 +106,21 @@ namespace Synergy.Domain.Implementation
         public string FlutterWaveDecryptData(string encryptedData, string encryptionKey)
         {
             TripleDESCryptoServiceProvider des = new TripleDESCryptoServiceProvider();
-            des.Key = ASCIIEncoding.UTF8.GetBytes(encryptionKey);
+            des.Key = Encoding.UTF8.GetBytes(encryptionKey);
             des.Mode = CipherMode.ECB;
             des.Padding = PaddingMode.PKCS7;
             ICryptoTransform cryptoTransform = des.CreateDecryptor();
-            byte[] EncryptDataBytes = Convert.FromBase64String(encryptedData);
-            byte[] plainDataBytes = cryptoTransform.TransformFinalBlock(EncryptDataBytes, 0, EncryptDataBytes.Length);
+            byte[] encryptDataBytes = Convert.FromBase64String(encryptedData);
+            byte[] plainDataBytes = cryptoTransform.TransformFinalBlock(encryptDataBytes, 0, encryptDataBytes.Length);
             des.Clear();
-            return ASCIIEncoding.UTF8.GetString(plainDataBytes);
+            return Encoding.UTF8.GetString(plainDataBytes);
         }
 
         #endregion
 
-        internal static readonly char[] chars =
+        internal static readonly char[] Chars =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".ToCharArray();
-        private const string BvnSecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVk";
+        private const string BVN_SECRET_KEY = "iNivDmHLpUA223sqsfhqGbMRdRj1PVk";
         private string GenerateClientKey(int size, string keyPrefix)
         {
             byte[] data = new byte[4 * size];
@@ -133,9 +132,9 @@ namespace Synergy.Domain.Implementation
             for (int i = 0; i < size; i++)
             {
                 var rnd = BitConverter.ToUInt32(data, i * 4);
-                var idx = rnd % chars.Length;
+                var idx = rnd % Chars.Length;
 
-                result.Append(chars[idx]);
+                result.Append(Chars[idx]);
             }
 
             return string.Concat(keyPrefix, result.ToString());
@@ -144,8 +143,8 @@ namespace Synergy.Domain.Implementation
         public ClientApiKey EncryptApiKey(string clientId, string keyPrefix)
         {
             //string EncryptionKey = "Ekoballs";
-            byte[] clearBytes = null;
-            string apiKey = "";
+            byte[] clearBytes;
+            string apiKey;
 
 
             apiKey = GenerateClientKey(20, keyPrefix);
@@ -154,29 +153,36 @@ namespace Synergy.Domain.Implementation
             using (Aes encryptor = Aes.Create())
             {
                 Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(clientId, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
-                encryptor.Key = pdb.GetBytes(32);
-                encryptor.IV = pdb.GetBytes(16);
-                using (MemoryStream ms = new MemoryStream())
+                if (encryptor != null)
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                    encryptor.Key = pdb.GetBytes(32);
+                    encryptor.IV = pdb.GetBytes(16);
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        cs.Write(clearBytes, 0, clearBytes.Length);
-                        cs.Close();
+                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(),
+                            CryptoStreamMode.Write))
+                        {
+                            cs.Write(clearBytes, 0, clearBytes.Length);
+                            cs.Close();
+                        }
+
+                        return new ClientApiKey {EncryptApiKey = Convert.ToBase64String(ms.ToArray()), ApiKey = apiKey};
                     }
-                    return new ClientApiKey { EncryptApiKey = Convert.ToBase64String(ms.ToArray()), ApiKey = apiKey };
                 }
             }
-            // return clearText;
+
+            return null;
         }
 
         public string DecryptApiKey(string clientId, string encryptKey)
         {
-            string decryptedValue = string.Empty;
+            string decryptedValue = null;
             encryptKey = encryptKey.Replace(" ", "+");
             byte[] cipherBytes = Convert.FromBase64String(encryptKey);
-            using (Aes encryptor = Aes.Create())
+            using Aes encryptor = Aes.Create();
+            Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(clientId, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+            if (encryptor != null)
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(clientId, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
                 using (MemoryStream ms = new MemoryStream())
@@ -186,9 +192,11 @@ namespace Synergy.Domain.Implementation
                         cs.Write(cipherBytes, 0, cipherBytes.Length);
                         cs.Close();
                     }
+
                     decryptedValue = Encoding.UTF8.GetString(ms.ToArray());
                 }
             }
+
             return decryptedValue;
         }
 
@@ -200,39 +208,51 @@ namespace Synergy.Domain.Implementation
             var clearBytes = Encoding.UTF8.GetBytes(bvn);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(BvnSecretKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
-                encryptor.Key = pdb.GetBytes(32);
-                encryptor.IV = pdb.GetBytes(16);
-                using (MemoryStream ms = new MemoryStream())
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(BVN_SECRET_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                if (encryptor != null)
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(), CryptoStreamMode.Write))
+                    encryptor.Key = pdb.GetBytes(32);
+                    encryptor.IV = pdb.GetBytes(16);
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        cs.Write(clearBytes, 0, clearBytes.Length);
-                        cs.Close();
+                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateEncryptor(),
+                            CryptoStreamMode.Write))
+                        {
+                            cs.Write(clearBytes, 0, clearBytes.Length);
+                            cs.Close();
+                        }
+
+                        return Convert.ToBase64String(ms.ToArray());
                     }
-                    return Convert.ToBase64String(ms.ToArray());
                 }
             }
+
+            return null;
         }
 
         public string DecryptBvn(string encryptBvn)
         {
-            string decryptedValue = string.Empty;
+            string decryptedValue = null;
             // var key = Encoding.UTF8.(BvnSecretKey);
             byte[] cipherBytes = Convert.FromBase64String(encryptBvn);
             using (Aes encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(BvnSecretKey, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
-                encryptor.Key = pdb.GetBytes(32);
-                encryptor.IV = pdb.GetBytes(16);
-                using (MemoryStream ms = new MemoryStream())
+                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(BVN_SECRET_KEY, new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                if (encryptor != null)
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                    encryptor.Key = pdb.GetBytes(32);
+                    encryptor.IV = pdb.GetBytes(16);
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        cs.Write(cipherBytes, 0, cipherBytes.Length);
-                        cs.Close();
+                        using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(),
+                            CryptoStreamMode.Write))
+                        {
+                            cs.Write(cipherBytes, 0, cipherBytes.Length);
+                            cs.Close();
+                        }
+
+                        decryptedValue = Encoding.UTF8.GetString(ms.ToArray());
                     }
-                    decryptedValue = Encoding.UTF8.GetString(ms.ToArray());
                 }
             }
             return decryptedValue;

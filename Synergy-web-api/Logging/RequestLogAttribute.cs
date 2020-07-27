@@ -7,16 +7,16 @@ using NLog;
 using Synergy.Service.Interfaces;
 using Synergy.Service.ViewModel;
 using System;
-using System.Web.Http.Filters;
+using Synergy.Service.Implementations;
 
 namespace Synergy_web_api.Logging
 {
-    public class RequestLogAttribute : Microsoft.AspNetCore.Mvc.Filters.ActionFilterAttribute
+    public class RequestLogAttribute : ActionFilterAttribute
     {
         private string modelArgument;
         private static Logger log = LogManager.GetCurrentClassLogger();
         private ILoggingService loggingService;
-        private string refernceId;
+        private string _refernceId;
         public RequestLogAttribute(string parameterName)
         {
             modelArgument = parameterName;
@@ -31,7 +31,7 @@ namespace Synergy_web_api.Logging
             {
                 string httpMethod = context.HttpContext.Request.Method;
                 string url = context.HttpContext.Request.Path;
-                refernceId = DateTime.UtcNow.Ticks.ToString();
+                _refernceId = DateTime.UtcNow.Ticks.ToString();
 
                 if (context.ActionArguments.Count > 0)
                 {
@@ -45,7 +45,7 @@ namespace Synergy_web_api.Logging
                         Payload = payload,
                         RequestMethod = httpMethod,
                         RequestReferencId = "",
-                        RequestUniqueRefernceId = refernceId,
+                        RequestUniqueRefernceId = _refernceId,
                         Url = url
 
                     });
@@ -66,6 +66,7 @@ namespace Synergy_web_api.Logging
             try
             {
                 if (context.Exception != null)
+                    // ReSharper disable once RedundantAssignment
                     payload = context.Exception.ToString();
                 else
                 {
@@ -78,7 +79,7 @@ namespace Synergy_web_api.Logging
 
                             payload = JsonConvert.SerializeObject(actionResult.Value);
                             var res = JObject.Parse(payload);
-                            cadawadaStatusCode = res["ResponseCode"].ToString();
+                            cadawadaStatusCode = res["ResponseCode"]?.ToString();
                             //cadawadaStatusCode = (int)payload["ResponseCode"].ToString();
                         }
                     }
@@ -86,7 +87,7 @@ namespace Synergy_web_api.Logging
                     loggingService.LogResponseData(new ResponseLoggingViewModel
                     {
                         Payload = payload,
-                        RequestUniqueRefernceId = refernceId,
+                        RequestUniqueRefernceId = _refernceId,
                         StatusCode = context.HttpContext.Response.StatusCode,
                         CadawadaStatusCode = cadawadaStatusCode,
 

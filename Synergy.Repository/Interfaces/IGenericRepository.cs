@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Synergy.Repository.Interfaces
@@ -16,7 +15,6 @@ namespace Synergy.Repository.Interfaces
         TEntity Create(TEntity entity);
         Task<TEntity> CreateAsync(TEntity entity);
         void Delete(TEntity entity);
-        Task DeleteAsync(TEntity entity);
         void DeleteRange(IEnumerable<TEntity> entities);
         IEnumerable<TEntity> GetAll(Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null);
         IAsyncEnumerable<TEntity> GetAllAsync(Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null, int? skip = null, int? take = null);
@@ -24,9 +22,7 @@ namespace Synergy.Repository.Interfaces
         TEntity GetFirst(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null);
        // Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null, string includeProperties = null);
         int Save();
-        Task<int> SaveAsync();
         void Update(TEntity entity);
         void UpdateAll(TEntity entity);
-        Task UpdateAsync(TEntity entity);
     }
 }

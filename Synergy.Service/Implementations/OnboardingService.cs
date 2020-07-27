@@ -7,17 +7,18 @@ using Synergy.Service.ApiResponse;
 using Synergy.Service.Interfaces;
 using Synergy.Service.ViewModel;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using System.Linq;
+using System.Web;
+using Microsoft.EntityFrameworkCore;
 using Synergy.Domain.ServiceModel;
 using Synergy.Service.Constants;
+using Synergy.Service.Helpers;
 
 namespace Synergy.Service.Implementations
 {
     public class OnboardingService : BaseService, IOnboardingService
     {
+        
         
         public OnboardingService(IHostingEnvironment evn, ICryptographyService cryptographyService, IEmailService emailService, IConfiguration config, IDbContext dbContext) : base(evn, cryptographyService, emailService, config, dbContext)
         {
@@ -25,10 +26,10 @@ namespace Synergy.Service.Implementations
 
         public async Task<Response<string>> UserSignOn(RegisterUserViewmodel request)
         {
-            var customweAccountContext = _dbContext.Set<CustomerAccount>();
+            var customweAccountContext = DbContext.Set<CustomerAccount>();
             try
             {
-                bool isUserExist = customweAccountContext.Any(a => a.PhoneNumber.Equals(request.PhoneNumber) || a.EmailAddress.Equals(request.EmailAddress,StringComparison.OrdinalIgnoreCase));
+                bool isUserExist = await customweAccountContext.AnyAsync(a => a.PhoneNumber.Equals(request.PhoneNumber) || a.EmailAddress.Equals(request.EmailAddress.ToLower()));
 
                 if (isUserExist)
                     return new Response<string>
@@ -41,23 +42,35 @@ namespace Synergy.Service.Implementations
                         }
                     };
 
-                HashDetail encryptPassword = cryptographyService.GenerateHash(request.Password);
-                customweAccountContext.Add(new CustomerAccount
+                HashDetail encryptPassword = CryptographyService.GenerateHash(request.Password);
+                await customweAccountContext.AddAsync(new CustomerAccount
                 {
                     CountryId = request.CountryId,
                     DailingCode = request.DailingCode,
-                    EmailAddress = request.EmailAddress,
+                    EmailAddress = request.EmailAddress.ToLower(),
                     FirstName = request.Firstname,
                     LastName = request.Lastname,
                     Password = encryptPassword.HashedValue,
                     PasswordKey = encryptPassword.Salt,
                     isEmailVerified = false,
-                    PhoneNumber  = request.PhoneNumber,
+                    PhoneNumber = request.PhoneNumber,
                 });
 
-                _dbContext.SaveChanges();
+                DbContext.SaveChanges();
 
+                var baseUrl = GetBaseUrl("BaseEndpoint");
+                var verify = GetBaseUrl("verifyUser");
+                var encodeData = $"{request.EmailAddress}+{request.PhoneNumber}+{DateTime.Now.Date}";
 
+                var maiilRequest = new EmailRequest
+                {
+                    Body = EmailFormatter.ConfirmEmail("",$"{baseUrl}{verify}?id={HttpUtility.UrlEncode(encodeData)}",DateTime.Now.Year.ToString(), ContentPath),
+                    Subject = "Kindly verify your email address",
+                    To = request.EmailAddress
+                    
+                };
+
+                EmailService.SendEmail(maiilRequest);
                 return new Response<string>
                 {
                     Status = Enums.ResponseStatus.Success,
@@ -72,7 +85,7 @@ namespace Synergy.Service.Implementations
             catch (Exception ex)
             {
 
-                log.Error(ex, "SendSMSVericationService");
+                Log.Error(ex, "SendSMSVericationService");
                 return new Response<string>
                 {
                     Status = Enums.ResponseStatus.ServerError,

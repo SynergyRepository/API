@@ -7,9 +7,8 @@ using Synergy.Service.Interfaces;
 using Synergy.Service.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Synergy.Service.ApiResponse;
 using Synergy.Service.ResponseData;
 using Synergy.Service.Constants;
@@ -24,18 +23,18 @@ namespace Synergy.Service.Implementations
 
         public async Task<Response<string>> AddCountry(CountryViewModel request)
         {
-            var countryContext = _dbContext.Set<Country>();
+            var countryContext = DbContext.Set<Country>();
             try
             {
 
-                countryContext.Add(new Country
+                await countryContext.AddAsync(new Country
                 {
                     CountryName = request.CountryName,
                     CountryShortCode = request.CountryCode,
                     DailingCode = request.DailingCode
                 });
 
-                _dbContext.SaveChanges();
+                DbContext.SaveChanges();
 
                 return new Response<string>
                 {
@@ -43,7 +42,7 @@ namespace Synergy.Service.Implementations
                     SuccessData = new SuccessResponse<string>
                     {
                         Data = "A new country have been added!!!",
-                        ResponseCode = Constants.SuccessCode.DEFAULT_SUCCESS_CODE,
+                        ResponseCode = SuccessCode.DEFAULT_SUCCESS_CODE,
                         ResponseMessage = "Successful"
                     }
                 };
@@ -51,15 +50,15 @@ namespace Synergy.Service.Implementations
             catch (Exception  ex)
             {
 
-                log.Error(ex,"");
+                Log.Error(ex,"");
                 return new Response<string>
                 {
                     Status = Enums.ResponseStatus.Conflict,
                     ErrorData = new ErrorResponse<string>
                     {
-                        Data = "Country already added!!!",
+                        Data = null,
                         ResponseCode = ErrorCode.UNIQUE_IDENTITY_VIOLATION,
-                        ResponseMessage = ""
+                        ResponseMessage = ErrorCode.UNIQUE_IDENTITY_VIOLATION
                     }
                 };
             }
@@ -67,11 +66,11 @@ namespace Synergy.Service.Implementations
 
         public async Task<Response<List<CountryData>>> GetAllCountry()
         {
-            var countryContext = _dbContext.Set<Country>();
+            var countryContext = DbContext.Set<Country>();
             var countries = new List<CountryData>();
             try
             {
-                var countriesQuery = countryContext.ToList();
+                var countriesQuery = await countryContext.ToListAsync();
                 if (countriesQuery == null)
                     return new Response<List<CountryData>>
                     {
@@ -90,7 +89,7 @@ namespace Synergy.Service.Implementations
                     {
                         CountryName = item.CountryName,
                         DailingCode = item.DailingCode,
-                        Id = item.Id,
+                        Id = item.CountryId,
                         ShortCode = item.CountryShortCode
                     });
                 }
@@ -108,7 +107,7 @@ namespace Synergy.Service.Implementations
             }
             catch (Exception ex)
             {
-                log.Error(ex, "");
+                Log.Error(ex, "GetAllCountry");
                 return new Response<List<CountryData>>
                 {
                     Status = Enums.ResponseStatus.Conflict,

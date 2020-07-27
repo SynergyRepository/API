@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Synergy.Repository.Models.Mapping
 {
@@ -71,6 +69,14 @@ namespace Synergy.Repository.Models.Mapping
                 t.EmailAddress
 
             }).HasName("IX_EmailAddress_UniqueIndex").IsUnique();
+
+            #endregion
+
+            #region Relationship
+
+            builder.HasOne(t => t.Country)
+                .WithMany(t => t.CustomerAccounts)
+                .HasForeignKey(t => t.CountryId);
 
             #endregion
         }

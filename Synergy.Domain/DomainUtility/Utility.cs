@@ -1,58 +1,26 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NLog;
-using SendGrid.Helpers.Mail;
-using Synergy.Domain.Interfaces;
-using Synergy.Domain.ServiceModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using SendGrid.Helpers.Mail;
+using Synergy.Domain.Interfaces;
+using Synergy.Domain.ServiceModel;
 
-namespace Synergy.Domain.Constants
+namespace Synergy.Domain.DomainUtility
 {
-    public static class Utilities
+  public static class Utility
     {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public static string GetSettingConfig(string key, string path)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(key))
-                    return string.Empty;
-                var fullPath = Path.Combine(path, "TempFolder", "Settings.json");
-                using (StreamReader file = File.OpenText(fullPath))
-                using (JsonTextReader reader = new JsonTextReader(file))
-                {
-                    JObject jsonObject = (JObject)JToken.ReadFrom(reader);
-                    var response = jsonObject["Response"] as JObject;
-                    if (response != null)
-                    {
-                        var value = response.Value<string>(key);
-                        return value;
-                    }
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "GetResponseMessage");
-                return string.Empty;
-            }
-
-            return "";
-        }
-
         public static async Task<string> GenerateJwt(ClaimsIdentity identity, IJwtFactory jwtFactory, string userName, JwtIssuerOptions jwtOptions, JsonSerializerSettings serializerSettings)
         {
+
             var response = new
             {
                 id = identity.Claims.Single(c => c.Type == "id").Value,
                 auth_token = await jwtFactory.GenerateEncodedToken(userName, identity),
-                expires_in = (int)jwtOptions.ValidFor.TotalSeconds
+                expires_in = (int)jwtOptions.ValidFor.TotalSeconds,
+                refresh_token = Guid.NewGuid().ToString()
             };
 
             return JsonConvert.SerializeObject(response, serializerSettings);

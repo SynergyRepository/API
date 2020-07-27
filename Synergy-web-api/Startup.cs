@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Synergy.Domain.Constants;
@@ -26,14 +21,15 @@ using Synergy.Repository.Database;
 using Synergy.Repository.Interfaces;
 using Synergy.Service.Implementations;
 using Synergy.Service.Interfaces;
+using Synergy_web_api.WebHandler;
 
 namespace Synergy_web_api
 {
     public class Startup
     {
-        private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRjEKOBL";
+        private const string SECRET_KEY = "iNivDmHLpUA223sqsfhqGbMRdRjEKOBL";
 
-        private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
+        private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SECRET_KEY));
         private readonly IHostEnvironment _env;
         public Startup(IConfiguration configuration,IHostEnvironment evn)
         {
@@ -54,11 +50,15 @@ namespace Synergy_web_api
             ConfigureSwagger(services);
             AuthorizationService(services);
 
+
+            services.AddSingleton(Configuration);
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.Configure<EmailConfigurationProvider>(Configuration.GetSection("EmailConfigurationProvider"));
             services.AddMemoryCache();
             services.AddScoped<IDbContext, SynergyDbContext>();
             services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddTransient<IOnboardingService, OnboardingService>();
+            services.AddTransient<IAuthenticationService, AuthenticationService>();
             services.AddTransient<ISynergySettings, SynergySettings>();
             services.AddTransient<ICryptographyService, CryptographyService>();
             services.AddTransient<IEmailService, EmailService>();
@@ -86,6 +86,8 @@ namespace Synergy_web_api
             if (_env.IsProduction())
                 services.AddDbContext<SynergyDbContext>(options =>
               options.UseSqlServer(Configuration.GetConnectionString("SynergyDbConnectionProduction")));
+
+            services.AddSingleton<IJwtFactory, JwtFactory>();
         }
 
         private void AuthorizationService(IServiceCollection services)

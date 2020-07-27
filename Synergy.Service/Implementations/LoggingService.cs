@@ -1,19 +1,21 @@
-﻿using Synergy.Repository.Database;
+﻿using System;
+using NLog;
+using Synergy.Repository.Database;
 using Synergy.Repository.Interfaces;
 using Synergy.Repository.Models;
+using Synergy.Service.Interfaces;
 using Synergy.Service.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Synergy.Service.Interfaces
+namespace Synergy.Service.Implementations
 {
     public class LoggingService : ILoggingService
     {
+        public static Logger Log = LogManager.GetCurrentClassLogger();
+
         public void LogRequestData(RequestLoggingViewModel request)
         {
-            IDbContext _dbContext = new SynergyDbContext();
-            var requestLog = _dbContext.Set<ClientRequestLog>();
+            IDbContext dbContext = new SynergyDbContext();
+            var requestLog = dbContext.Set<ClientRequestLog>();
             try
             {
                 requestLog.Add(new ClientRequestLog
@@ -27,18 +29,18 @@ namespace Synergy.Service.Interfaces
                     DateLogged = DateTime.UtcNow
                 });
 
-                _dbContext.SaveChanges();
+                dbContext.SaveChanges();
             }
             catch (Exception ex)
             {
-                // log.Error(ex, "LogRequestData");
+                Log.Error(ex, "LogRequestData");
             }
         }
 
         public void LogResponseData(ResponseLoggingViewModel response)
         {
-            IDbContext _dbContext = new SynergyDbContext();
-            var responseLog = _dbContext.Set<ClientResponseLog>();
+            IDbContext dbContext = new SynergyDbContext();
+            var responseLog = dbContext.Set<ClientResponseLog>();
             try
             {
                 responseLog.Add(new ClientResponseLog
@@ -50,12 +52,12 @@ namespace Synergy.Service.Interfaces
                     DateLogged = DateTime.UtcNow
                 });
 
-                _dbContext.SaveChanges();
+                dbContext.SaveChanges();
             }
             catch (Exception ex)
             {
 
-                // log.Error(ex, "LogResponseData");
+                Log.Error(ex, "LogResponseData");
             }
         }
     }

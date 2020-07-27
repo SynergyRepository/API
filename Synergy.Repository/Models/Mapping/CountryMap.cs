@@ -1,22 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Synergy.Repository.Models.Mapping
 {
-   public  class CountryMap : IEntityTypeConfiguration<Country>
+    public  class CountryMap : IEntityTypeConfiguration<Country>
     {
         public void Configure(EntityTypeBuilder<Country> builder)
         {
             builder.ToTable("Country");
 
             #region
-            builder.HasKey(t => t.Id);
+            builder.HasKey(t => t.CountryId);
 
-            builder.Property(t => t.Id)
-                .ValueGeneratedNever()
+            builder.Property(t => t.CountryId)
                 .HasColumnName("Id")
                 .IsRequired();
 

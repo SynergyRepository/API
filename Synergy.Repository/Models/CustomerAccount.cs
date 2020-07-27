@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Synergy.Repository.Models
 {
@@ -18,5 +16,6 @@ namespace Synergy.Repository.Models
         public bool isEmailVerified { get; set; }
         public DateTime CreatedDate { get; set; }
         public string RefererCode { get; set; }
+        public Country Country { get; set; }
     }
 }

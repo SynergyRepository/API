@@ -54,6 +54,7 @@ namespace Synergy.Service.Implementations
                     PasswordKey = encryptPassword.Salt,
                     isEmailVerified = false,
                     PhoneNumber = request.PhoneNumber,
+                    HowDoyouKnow = request.HowDoyouKnowUs
                 });
 
                 DbContext.SaveChanges();

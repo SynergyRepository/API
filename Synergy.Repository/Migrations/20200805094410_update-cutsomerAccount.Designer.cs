@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Synergy.Repository.Database;
 
 namespace Synergy.Repository.Migrations
 {
     [DbContext(typeof(SynergyDbContext))]
-    partial class SynergyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200805094410_update-cutsomerAccount")]
+    partial class updatecutsomerAccount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

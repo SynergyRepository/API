@@ -48,6 +48,8 @@ namespace Synergy.Repository.Models.Mapping
                 .HasColumnName("Password")
                 .IsRequired();
 
+            builder.Property(a => a.HowDoyouKnow)
+                .HasColumnName("HowDoyouKnow");
 
             builder.Property(a => a.isEmailVerified)
                 .IsRequired()

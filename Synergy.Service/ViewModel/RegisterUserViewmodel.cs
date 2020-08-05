@@ -30,7 +30,7 @@ namespace Synergy.Service.ViewModel
         [Data(DataToCheck = "string", ErrorMessage = "Invalid {0}")]
         public string ConfirmPassword { get; set; }
         [Required]
-        public int NotificationId { get; set; }
+        public string HowDoyouKnowUs { get; set; }
         [Required]
         [Data(DataToCheck = "string", ErrorMessage = "Invalid {0}")]
         public string Refernceid { get; set; }

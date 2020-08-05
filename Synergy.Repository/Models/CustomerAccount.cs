@@ -14,6 +14,7 @@ namespace Synergy.Repository.Models
         public string Password { get; set; }
         public string PasswordKey { get; set; }
         public bool isEmailVerified { get; set; }
+        public string HowDoyouKnow { get; set; }
         public DateTime CreatedDate { get; set; }
         public string RefererCode { get; set; }
         public Country Country { get; set; }

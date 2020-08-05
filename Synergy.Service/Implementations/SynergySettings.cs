@@ -7,11 +7,14 @@ using Synergy.Service.Interfaces;
 using Synergy.Service.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Synergy.Service.ApiResponse;
 using Synergy.Service.ResponseData;
 using Synergy.Service.Constants;
+using Synergy.Service.Enums;
 
 namespace Synergy.Service.Implementations
 {
@@ -112,6 +115,51 @@ namespace Synergy.Service.Implementations
                 {
                     Status = Enums.ResponseStatus.Conflict,
                     ErrorData = new ErrorResponse<List<CountryData>>
+                    {
+                        Data = null,
+                        ResponseCode = ErrorCode.NOT_FOUND,
+                        ResponseMessage = "Can not get country at the moment try again"
+                    }
+                };
+            }
+        }
+
+        public async Task<Response<string>> GetHowYouHearAboutUs()
+        {
+            try
+            {
+                var enumList = Enum.GetNames(typeof(InformationMetaDataEnum)).ToList();
+
+                if (enumList.Count > 0)
+                    return new Response<string>
+                    {
+                        Status = ResponseStatus.Success,
+                        SuccessData = new SuccessResponse<string>
+                        {
+                            ResponseCode = SuccessCode.DEFAULT_SUCCESS_CODE,
+                            Status = ResponseStatus.Success,
+                            Data = JsonConvert.SerializeObject(enumList),
+                            ResponseMessage = "Data request successful"
+                        }
+                    };
+                return new Response<string>
+                {
+                    Status = ResponseStatus.NotFound,
+                    ErrorData = new ErrorResponse<string>
+                    {
+                      ResponseCode = ErrorCode.NOT_FOUND,
+                      ResponseMessage = "Request Not Found",
+                      Data = null
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "GetAllCountry");
+                return new Response<string>
+                {
+                    Status = Enums.ResponseStatus.Conflict,
+                    ErrorData = new ErrorResponse<string>
                     {
                         Data = null,
                         ResponseCode = ErrorCode.NOT_FOUND,

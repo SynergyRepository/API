@@ -1,10 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Synergy.Service.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Synergy.Service.ApiResponse;
 using Synergy.Service.Enums;
 using Synergy.Service.ViewModel;
 using Synergy_web_api.Base;
@@ -24,7 +26,9 @@ namespace Synergy_web_api.Controllers
         }
 
 
+
         [HttpPost("login")]
+        [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<string>))]
         public async Task<IActionResult> Login(LoginViewModel login)
 
         {

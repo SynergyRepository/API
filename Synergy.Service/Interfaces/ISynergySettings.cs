@@ -12,5 +12,6 @@ namespace Synergy.Service.Interfaces
     {
         Task<Response<string>> AddCountry(CountryViewModel request);
         Task<Response<List<CountryData>>> GetAllCountry();
+        Task<Response<string>> GetHowYouHearAboutUs();
     }
 }

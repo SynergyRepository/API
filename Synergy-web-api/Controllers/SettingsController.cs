@@ -1,11 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Synergy.Service.ApiResponse;
 using Synergy.Service.Enums;
 using Synergy.Service.Interfaces;
+using Synergy.Service.ResponseData;
 using Synergy.Service.ViewModel;
 using Synergy_web_api.Base;
 using Synergy_web_api.Logging;
@@ -27,6 +31,8 @@ namespace Synergy_web_api.Controllers
 
         [HttpPost("admin/country")]
         [RequestLog("request")]
+        [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<string>))]
+
         public async Task<IActionResult> AddCountry([FromBody] CountryViewModel request)
         {
 
@@ -51,6 +57,8 @@ namespace Synergy_web_api.Controllers
 
         [HttpGet("admin/country")]
         [RequestLog("request")]
+        [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<List<CountryData>>))]
+
         public async Task<IActionResult> GetCountry()
         {
 
@@ -68,5 +76,26 @@ namespace Synergy_web_api.Controllers
 
             return Ok(response.SuccessData);
         }
+
+        [HttpGet("admin/tell-us-how")]
+        [ProducesResponseType((int) HttpStatusCode.OK, StatusCode = (int) HttpStatusCode.OK,
+            Type = typeof(SuccessResponse<string>))]
+        public async Task<IActionResult> HowDoHearAboutUs()
+        {
+            var response = await _synergySettings.GetHowYouHearAboutUs();
+
+            if (response.Status.Equals(ResponseStatus.BadRequest))
+                return BadRequest(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.Conflict))
+                return Conflict(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.ServerError))
+                return StatusCode(500, response.ErrorData);
+
+
+            return Ok(response.SuccessData);
+        }
+
     }
 }

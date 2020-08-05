@@ -31,7 +31,7 @@ namespace Synergy.Repository.Database
                     .AddJsonFile("appsettings.json");
 
                 var configuration = builder.Build();
-                optionsBuilder.UseSqlServer(configuration.GetConnectionString("SynergyDbConnection"));
+               optionsBuilder.UseSqlServer(configuration.GetConnectionString("SynergyDbConnection"));
 
 
             }

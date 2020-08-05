@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Synergy.Service.ApiResponse;
 using Synergy.Service.Enums;
 using Synergy.Service.Interfaces;
 using Synergy.Service.ViewModel;
@@ -27,6 +29,8 @@ namespace Synergy_web_api.Controllers
         
         [HttpPost("user")]
         [RequestLog("request")]
+        [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<string>))]
+
         public async Task<IActionResult> UserSignOn([FromBody] RegisterUserViewmodel request)
         {
             if (!ModelState.IsValid)

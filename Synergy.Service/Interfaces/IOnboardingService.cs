@@ -10,5 +10,6 @@ namespace Synergy.Service.Interfaces
     public interface IOnboardingService
     {
         Task<Response<string>> UserSignOn(RegisterUserViewmodel request);
+        Task<Response<string>> AdminSignOn(BaseUserViewmodel viewmodel);
     }
 }

@@ -61,6 +61,9 @@ namespace Synergy.Repository.Models.Mapping
                 .IsRequired()
                 .HasDefaultValue(DateTime.UtcNow);
 
+            builder.Property(a => a.Role)
+                .HasColumnName("Role");
+                
             builder.HasIndex(t => new
             {
                 t.PhoneNumber

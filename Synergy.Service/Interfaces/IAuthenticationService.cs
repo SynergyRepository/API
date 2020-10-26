@@ -12,6 +12,8 @@ namespace Synergy.Service.Interfaces
     {
         Task<Response<AuthenticationResponse>> LoginUserAsyn(LoginViewModel loginViewModel);
 
+        Task<Response<AuthenticationResponse>> AdminUserAsyn(LoginViewModel loginViewModel);
+
         Task<Response<string>> ActivateCustomerAccount(string encodedString);
     }
 }

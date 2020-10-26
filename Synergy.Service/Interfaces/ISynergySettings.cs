@@ -11,6 +11,7 @@ namespace Synergy.Service.Interfaces
     public interface ISynergySettings
     {
         Task<Response<string>> AddCountry(CountryViewModel request);
+        Task<Response<string>> AddInvsetment(InvestmentVeiwModel request);
         Task<Response<List<CountryData>>> GetAllCountry();
         Task<Response<string>> GetHowYouHearAboutUs();
     }

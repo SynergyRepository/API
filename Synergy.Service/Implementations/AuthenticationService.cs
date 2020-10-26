@@ -114,6 +114,87 @@ namespace Synergy.Service.Implementations
             }
         }
 
+        public async Task<Response<AuthenticationResponse>> AdminUserAsyn(LoginViewModel loginViewModel)
+        {
+           
+            try
+            {
+                var loginUserContext = DbContext.Set<AdminAccount>();
+                var customerAccount =
+                    await loginUserContext.FirstOrDefaultAsync(a => a.EmailAddress == loginViewModel.UserName);
+
+                if (customerAccount == null)
+                    return new Response<AuthenticationResponse>
+                    {
+                        Status = ResponseStatus.NotFound,
+                        ErrorData = new ErrorResponse<AuthenticationResponse>
+                        {
+                            Data = null,
+                            ResponseCode = ErrorCode.NOT_FOUND,
+                            ResponseMessage = "Account does not exist, kindly user the get started to sign on"
+                        }
+                    };
+
+                bool isPassword = CryptographyService.ValidateHash(loginViewModel.Password, customerAccount.PasswordKey, customerAccount.Password);
+                if (!isPassword)
+                    return new Response<AuthenticationResponse>
+                    {
+                        Status = ResponseStatus.Unauthorized,
+                        ErrorData = new ErrorResponse<AuthenticationResponse>
+                        {
+                            ResponseCode = ErrorCode.UNAUTHORIZED_USER_ACCESS,
+                            ResponseMessage = "Either email address or password ins invalid",
+                            Data = null
+
+                        }
+                    };
+                var identity = _jwtFactory.GenerateClaimsIdentity(loginViewModel.UserName, customerAccount.Role, customerAccount.AccountId.ToString());
+                var jwtToken = await Domain.DomainUtility.Utility.GenerateJwt(identity, _jwtFactory, customerAccount.EmailAddress,customerAccount.Role ,_jwtOptions, new JsonSerializerSettings { Formatting = Formatting.None });
+
+                var authToken = JsonConvert.DeserializeObject<TokenModel>(jwtToken);
+
+                var data = new AuthenticationResponse
+                {
+                    Token = authToken,
+                   
+                    UserDetail = new UserDetail
+                    {
+                        EmailAddress = loginViewModel.UserName,
+                        FirstName = customerAccount.FirstName,
+                        LastName = customerAccount.LastName,
+                        Selfie = "",
+                        UserId = customerAccount.AccountId.ToString()
+                    }
+                };
+
+                return new Response<AuthenticationResponse>
+                {
+                    Status = ResponseStatus.Success,
+                    SuccessData = new SuccessResponse<AuthenticationResponse>
+                    {
+                        ResponseCode = SuccessCode.DEFAULT_SUCCESS_CODE,
+                        ResponseMessage = "User Login successfully",
+                        Status = ResponseStatus.Success,
+                        Data = data
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "LoginUserAsyn");
+                return new Response<AuthenticationResponse>
+                {
+                    ErrorData = new ErrorResponse<AuthenticationResponse>
+                    {
+                        ResponseCode = ErrorCode.INTERNAL_SERVER_ERROR,
+                        ResponseMessage =
+                            "Sorry, we are unable to complete this operation at the moment, kindly try again later"
+                    }
+                };
+            }
+
+        }
+
         public async Task<Response<AuthenticationResponse>> LoginUserAsyn(LoginViewModel loginViewModel)
         {
             var loginUserContext = DbContext.Set<CustomerAccount>().Include(a => a.Country);
@@ -177,8 +258,8 @@ namespace Synergy.Service.Implementations
                     };
                 }
 
-                var identity = _jwtFactory.GenerateClaimsIdentity(loginViewModel.UserName, customerAccount.Id.ToString());
-                var jwtToken = await Domain.DomainUtility.Utility.GenerateJwt(identity, _jwtFactory, customerAccount.EmailAddress, _jwtOptions, new JsonSerializerSettings { Formatting = Formatting.None });
+                var identity = _jwtFactory.GenerateClaimsIdentity(loginViewModel.UserName, customerAccount.Role,customerAccount.Id.ToString());
+                var jwtToken = await Domain.DomainUtility.Utility.GenerateJwt(identity, _jwtFactory, customerAccount.EmailAddress, customerAccount.Role,_jwtOptions, new JsonSerializerSettings { Formatting = Formatting.None });
 
                 var authToken = JsonConvert.DeserializeObject<TokenModel>(jwtToken);
 

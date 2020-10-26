@@ -19,21 +19,22 @@ namespace Synergy.Domain.Implementation
             _jwtOptions = jwtOptions.Value;
             ThrowIfInvalidOptions(_jwtOptions);
         }
-        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id)
+        public ClaimsIdentity GenerateClaimsIdentity(string userName, string id,string role)
         {
             return new ClaimsIdentity(new GenericIdentity(userName, "Token"), new[]
             {
                 new Claim(JwtClaimIdentifiers.Id, id),
-                new Claim(JwtClaimIdentifiers.Role, JwtClaimIdentifiers.ApiAccess)
+                new Claim(ClaimTypes.Role,role)
             });
         }
 
-        public async Task<string> GenerateEncodedToken(string userName, ClaimsIdentity identity)
+        public async Task<string> GenerateEncodedToken(string userName, string role,ClaimsIdentity identity)
         {
             var claims = new[]
            {
                  new Claim(JwtRegisteredClaimNames.Sub, userName),
                  new Claim(JwtRegisteredClaimNames.Jti, await _jwtOptions.JtiGenerator()),
+                 new Claim(ClaimTypes.Role,role),
                  new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
                  identity.FindFirst(JwtClaimIdentifiers.Role),
                  identity.FindFirst(JwtClaimIdentifiers.Id)

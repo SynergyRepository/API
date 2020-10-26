@@ -19,6 +19,49 @@ namespace Synergy.Repository.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Synergy.Repository.Models.AdminAccount", b =>
+                {
+                    b.Property<int>("AccountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("Id")
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnName("Username")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnName("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnName("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnName("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordKey")
+                        .IsRequired()
+                        .HasColumnName("PasswordKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnName("Role")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AccountId");
+
+                    b.ToTable("AdminUser");
+                });
+
             modelBuilder.Entity("Synergy.Repository.Models.ClientRequestLog", b =>
                 {
                     b.Property<int>("Id")
@@ -36,7 +79,7 @@ namespace Synergy.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("DateLogged")
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2020, 8, 5, 9, 44, 10, 71, DateTimeKind.Utc).AddTicks(2991));
+                        .HasDefaultValue(new DateTime(2020, 9, 24, 21, 2, 35, 469, DateTimeKind.Utc).AddTicks(6963));
 
                     b.Property<string>("Payload")
                         .HasColumnName("Payload")
@@ -78,7 +121,7 @@ namespace Synergy.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("DateLogged")
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2020, 8, 5, 9, 44, 10, 77, DateTimeKind.Utc).AddTicks(9027));
+                        .HasDefaultValue(new DateTime(2020, 9, 24, 21, 2, 35, 478, DateTimeKind.Utc).AddTicks(7841));
 
                     b.Property<int>("HttpStatusCode")
                         .HasColumnName("StatusCode")
@@ -159,11 +202,14 @@ namespace Synergy.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("CreatedDate")
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2020, 8, 5, 9, 44, 10, 207, DateTimeKind.Utc).AddTicks(3813));
+                        .HasDefaultValue(new DateTime(2020, 9, 24, 21, 2, 35, 655, DateTimeKind.Utc).AddTicks(1985));
 
                     b.Property<string>("DailingCode")
                         .HasColumnName("DailingCode")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("EmailAddress")
                         .IsRequired()
@@ -184,6 +230,12 @@ namespace Synergy.Repository.Migrations
                         .HasColumnName("LastName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("NationalityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Occupation")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnName("Password")
@@ -200,6 +252,10 @@ namespace Synergy.Repository.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("RefererCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .HasColumnName("Role")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("isEmailVerified")
@@ -223,11 +279,115 @@ namespace Synergy.Repository.Migrations
                     b.ToTable("CustomerAccount");
                 });
 
+            modelBuilder.Entity("Synergy.Repository.Models.InvestmentCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("CategoryId")
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasColumnName("CategoryName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnName("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2020, 9, 24, 21, 2, 35, 669, DateTimeKind.Utc).AddTicks(1010));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InvestmnetCategory");
+                });
+
+            modelBuilder.Entity("Synergy.Repository.Models.SynergyInvestment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("Id")
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AvailableSlot")
+                        .HasColumnName("AvailableSlot")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CatergoryId")
+                        .HasColumnName("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnName("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2020, 9, 24, 21, 2, 35, 674, DateTimeKind.Utc).AddTicks(6333));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnName("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Duration")
+                        .HasColumnName("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasColumnName("InterestRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnName("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnName("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SoldOutSlot")
+                        .HasColumnName("SolOutSlot")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Thumbnail")
+                        .IsRequired()
+                        .HasColumnName("Thumbnail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CatergoryId");
+
+                    b.ToTable("SynergyInvestment");
+                });
+
             modelBuilder.Entity("Synergy.Repository.Models.CustomerAccount", b =>
                 {
                     b.HasOne("Synergy.Repository.Models.Country", "Country")
                         .WithMany("CustomerAccounts")
                         .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Synergy.Repository.Models.SynergyInvestment", b =>
+                {
+                    b.HasOne("Synergy.Repository.Models.InvestmentCategory", "InvestmentCategory")
+                        .WithMany("SynergyInvestments")
+                        .HasForeignKey("CatergoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

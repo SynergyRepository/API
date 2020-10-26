@@ -67,6 +67,56 @@ namespace Synergy.Service.Implementations
             }
         }
 
+        public  async Task<Response<string>> AddInvsetment(InvestmentVeiwModel request)
+        {
+            try
+            {
+                var investmentContext = DbContext.Set<SynergyInvestment>();
+
+                await investmentContext.AddAsync(new SynergyInvestment
+                {
+                    AvailableSlot = request.AvailableSlots,
+                    CatergoryId = 1,
+                    CreatedBy = "Admin",
+                    Description = request.Description,
+                    Duration = request.Duration,
+                    InterestRate = request.InterestRate,
+                    Location = request.Location,
+                    Name = request.Title,
+                    Thumbnail = request.Thumbnail,
+                    SoldOutSlot =0,
+                });
+
+                DbContext.SaveChanges();
+
+                return new Response<string>
+                {
+                    Status = Enums.ResponseStatus.Success,
+                    SuccessData = new SuccessResponse<string>
+                    {
+                        Data = "A new country have been added!!!",
+                        ResponseCode = SuccessCode.DEFAULT_SUCCESS_CODE,
+                        ResponseMessage = "Successful"
+                    }
+                };
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "AddInvsetment");
+                return new Response<string>
+                {
+                    Status = Enums.ResponseStatus.Conflict,
+                    ErrorData = new ErrorResponse<string>
+                    {
+                        Data = null,
+                        ResponseCode = ErrorCode.NOT_FOUND,
+                        ResponseMessage = "Can not get country at the moment try again"
+                    }
+                };
+            }
+        }
+
         public async Task<Response<List<CountryData>>> GetAllCountry()
         {
             var countryContext = DbContext.Set<Country>();

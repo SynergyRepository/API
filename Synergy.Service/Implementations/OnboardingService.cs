@@ -24,6 +24,66 @@ namespace Synergy.Service.Implementations
         {
         }
 
+        public async Task<Response<string>> AdminSignOn(BaseUserViewmodel viewmodel)
+        {
+            try
+            {
+                var adminUserContext = DbContext.Set<AdminAccount>();
+
+                bool isUserExist = await adminUserContext.AnyAsync(a => a.EmailAddress.Equals(viewmodel.EmailAddress.ToLower()));
+
+                if (isUserExist)
+                    return new Response<string>
+                    {
+                        Status = Enums.ResponseStatus.Conflict,
+                        ErrorData = new ErrorResponse<string>
+                        {
+                            Data = $"Either {viewmodel.EmailAddress} already exist"
+
+                        }
+                    };
+
+                HashDetail encryptPassword = CryptographyService.GenerateHash(viewmodel.Password);
+                await adminUserContext.AddAsync(new AdminAccount
+                {
+                     EmailAddress = viewmodel.EmailAddress,
+                     Password = encryptPassword.HashedValue,
+                     PasswordKey = encryptPassword.Salt,
+                     FirstName = viewmodel.Firstname,
+                     LastName = viewmodel.Lastname,
+                     Role = Role.Admin
+                });
+
+                DbContext.SaveChanges();
+
+                return new Response<string>
+                {
+                    Status = Enums.ResponseStatus.Success,
+                    SuccessData = new SuccessResponse<string>
+                    {
+                        Data = "Account Created successfully, kindly check your email to verify your account",
+                        ResponseCode = SuccessCode.DEFAULT_SUCCESS_CODE,
+                        ResponseMessage = "",
+                    }
+                };
+
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "SendSMSVericationService");
+                return new Response<string>
+                {
+                    Status = Enums.ResponseStatus.ServerError,
+                    ErrorData = new ErrorResponse<string>
+                    {
+                        Data = "Error retrieving data, try again",
+                        ResponseCode = ErrorCode.INTERNAL_SERVER_ERROR,
+                        ResponseMessage = "",
+                    }
+                };
+            }
+        }
+
         public async Task<Response<string>> UserSignOn(RegisterUserViewmodel request)
         {
             var customweAccountContext = DbContext.Set<CustomerAccount>();
@@ -53,6 +113,7 @@ namespace Synergy.Service.Implementations
                     Password = encryptPassword.HashedValue,
                     PasswordKey = encryptPassword.Salt,
                     isEmailVerified = false,
+                    Role = Role.User,
                     PhoneNumber = request.PhoneNumber,
                     HowDoyouKnow = request.HowDoyouKnowUs
                 });

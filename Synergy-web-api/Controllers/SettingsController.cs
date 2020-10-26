@@ -30,7 +30,7 @@ namespace Synergy_web_api.Controllers
 
 
         [HttpPost("admin/country")]
-        [RequestLog("request")]
+       // [RequestLog("request")]
         [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<string>))]
 
         public async Task<IActionResult> AddCountry([FromBody] CountryViewModel request)
@@ -56,7 +56,7 @@ namespace Synergy_web_api.Controllers
         }
 
         [HttpGet("admin/country")]
-        [RequestLog("request")]
+       // [RequestLog("request")]
         [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<List<CountryData>>))]
 
         public async Task<IActionResult> GetCountry()
@@ -83,6 +83,26 @@ namespace Synergy_web_api.Controllers
         public async Task<IActionResult> HowDoHearAboutUs()
         {
             var response = await _synergySettings.GetHowYouHearAboutUs();
+
+            if (response.Status.Equals(ResponseStatus.BadRequest))
+                return BadRequest(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.Conflict))
+                return Conflict(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.ServerError))
+                return StatusCode(500, response.ErrorData);
+
+
+            return Ok(response.SuccessData);
+        }
+
+        [HttpPost("admin/investment")]
+        [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK,
+            Type = typeof(SuccessResponse<string>))]
+        public async Task<IActionResult> AddInvestment(InvestmentVeiwModel veiwModel)
+        {
+            var response = await _synergySettings.AddInvsetment(veiwModel);
 
             if (response.Status.Equals(ResponseStatus.BadRequest))
                 return BadRequest(response.ErrorData);

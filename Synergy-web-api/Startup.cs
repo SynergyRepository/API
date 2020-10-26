@@ -66,10 +66,10 @@ namespace Synergy_web_api
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll",
+                options.AddPolicy("ApiCorsPolicy",
                         corsBbuilder =>
                         {
-                            corsBbuilder.AllowAnyOrigin()
+                            corsBbuilder.WithOrigins()
                                 .AllowAnyMethod()
                                 .AllowAnyHeader()
                                 .AllowCredentials()
@@ -181,7 +181,7 @@ namespace Synergy_web_api
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseCors();
             app.UseHttpsRedirection();
 
             app.UseRouting();

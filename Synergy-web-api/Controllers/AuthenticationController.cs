@@ -56,5 +56,35 @@ namespace Synergy_web_api.Controllers
 
            
         }
+
+        [HttpPost("admin/login")]
+        [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<string>))]
+        public async Task<IActionResult> AdminLogin(LoginViewModel login)
+
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(RequestResponseFormatter.BadRequestResponse(ModelState, "BadLoginRequest",
+                    "InvalidLoginRequest", RootPath));
+
+
+            var response = await _authenticationService.AdminUserAsyn(login);
+
+            if (response.Status == ResponseStatus.Unauthorized)
+                return Unauthorized(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.BadRequest))
+                return BadRequest(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.Conflict))
+                return Conflict(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.ServerError))
+                return StatusCode(500, response.ErrorData);
+
+
+            return Ok(response.SuccessData);
+
+
+        }
     }
 }

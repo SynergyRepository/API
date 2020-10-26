@@ -28,7 +28,7 @@ namespace Synergy_web_api.Controllers
 
         
         [HttpPost("user")]
-        [RequestLog("request")]
+        ////[RequestLog("request")]
         [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<string>))]
 
         public async Task<IActionResult> UserSignOn([FromBody] RegisterUserViewmodel request)
@@ -38,6 +38,31 @@ namespace Synergy_web_api.Controllers
             // return BadRequest();
 
             var response = await _onboarding.UserSignOn(request: request);
+
+            if (response.Status.Equals(ResponseStatus.BadRequest))
+                return BadRequest(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.Conflict))
+                return Conflict(response.ErrorData);
+
+            if (response.Status.Equals(ResponseStatus.ServerError))
+                return StatusCode(500, response.ErrorData);
+
+
+            return Ok(response.SuccessData);
+        }
+
+        [HttpPost("Admin")]
+        //[RequestLog("request")]
+        [ProducesResponseType((int)HttpStatusCode.OK, StatusCode = (int)HttpStatusCode.OK, Type = typeof(SuccessResponse<string>))]
+
+        public async Task<IActionResult> AdminSignOn([FromBody] BaseUserViewmodel request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(RequestResponseFormatter.BadRequestResponse(ModelState, "BadGettingStartedRequest", "InvalidGettingStartedRequest", RootPath));
+            // return BadRequest();
+
+            var response = await _onboarding.AdminSignOn(viewmodel: request);
 
             if (response.Status.Equals(ResponseStatus.BadRequest))
                 return BadRequest(response.ErrorData);
